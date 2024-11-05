@@ -7,7 +7,7 @@ library(monocle3)
 library(ArchR)
 
 
-timepoint = "85"
+timepoint = "775"
 load_folder <- paste0("./data/Mef2c_v13_E", timepoint, "_subset/")
 proj_mef2c <- loadArchRProject(path = load_folder, force = FALSE, showLogo = TRUE)
 

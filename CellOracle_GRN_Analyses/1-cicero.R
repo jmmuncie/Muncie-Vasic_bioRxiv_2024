@@ -23,8 +23,8 @@ peakinfo <- data.frame(chr = peak_mat@rowRanges@seqnames,
                        bp1 = peak_mat@rowRanges@ranges@start, 
                        bp2 = peak_mat@rowRanges@ranges@start+500, 
                        site_name = paste(peak_mat@rowRanges@seqnames,
-		       peak_mat@rowRanges@ranges@start,
-		       peak_mat@rowRanges@ranges@start+500,  sep="_"))
+                       peak_mat@rowRanges@ranges@start,
+                       peak_mat@rowRanges@ranges@start+500,  sep="_"))
 
 row.names(peakinfo) <- peakinfo$site_name
 
