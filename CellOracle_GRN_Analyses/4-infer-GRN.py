@@ -105,12 +105,13 @@ for condition_timepoint in [['WT', '775'], ['KO', '775'], ['WT', '85'], ['KO', '
     base_GRN = pd.read_parquet(f'data/base_grn_outputs/E{timepoint}/{wt_or_ko}_base_GRN_dataframe.parquet')
     
     ### If you want to prune based on differential accessibility
-    diffexp = pd.read_csv(f'./data/base_grn_diff_access/e{timepoint}{wt_or_ko.lower()}.txt', sep = '\t')
-    removed_indexes = []
-    for index, row in diffexp.iterrows():
-        if row['Log2FC'] < -1:
-            removed_indexes.append(f"{row['seqnames']}_{row['start']}_{row['end']}")                
-    base_GRN = base_GRN[~base_GRN.peak_id.isin(removed_indexes)]
+    # diffexp = pd.read_csv(f'./data/base_grn_diff_access/e{timepoint}{wt_or_ko.lower()}.txt', sep = '\t')
+    # removed_indexes = []
+    # for index, row in diffexp.iterrows():
+    #     if row['Log2FC'] < -1:
+    #         removed_indexes.append(f"{row['seqnames']}_{row['start']}_{row['end']}")                
+    # base_GRN = base_GRN[~base_GRN.peak_id.isin(removed_indexes)]
+    ###
     
     oracle = co.Oracle()
     
