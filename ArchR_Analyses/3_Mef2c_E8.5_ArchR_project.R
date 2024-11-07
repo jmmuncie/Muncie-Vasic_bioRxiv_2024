@@ -1404,9 +1404,9 @@ saveArchRProject(ArchRProj = proj_Mef2c_v13_E85, overwrite = TRUE, dropCells = F
 saveArchRProject(ArchRProj = proj_Mef2c_v13_E85_subset, overwrite = TRUE, dropCells = FALSE, load = TRUE)
 
 #to load
-proj_Mef2c_v13_E85 <- loadArchRProject("~/Mef2c_v13_ArchR_working/Mef2c_v13_E85_ATAC_and_GEX")
-proj_Mef2c_v13_E85_subset <- loadArchRProject("~/Mef2c_v13_ArchR_working/Mef2c_v13_E85_subset")
-setwd("~/Mef2c_v13_ArchR_working")
+proj_Mef2c_v13_E85 <- loadArchRProject("~/Mef2c_ArchR_working/Mef2c_v13_E85_ATAC_and_GEX")
+proj_Mef2c_v13_E85_subset <- loadArchRProject("~/Mef2c_ArchR_working/Mef2c_v13_E85_subset")
+setwd("~/Mef2c_ArchR_working")
 
 
 
