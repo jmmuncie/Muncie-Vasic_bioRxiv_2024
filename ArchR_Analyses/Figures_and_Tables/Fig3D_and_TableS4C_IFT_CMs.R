@@ -2,7 +2,7 @@
 
 #This script is written to create P2G-DEG correlation plots 
 
-###---------------Load Librariess------------------------------
+###---------------Load Libraries------------------------------
 library(ArchR); library(Seurat); library(dplyr)
 library(GenomeInfoDb); library(ensembldb)
 library(ggplot2); library(patchwork); library(ggrepel); library(tune)
