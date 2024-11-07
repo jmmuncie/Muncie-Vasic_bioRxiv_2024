@@ -6,9 +6,6 @@ set.seed(1234)
 library(BSgenome) 
 library(hexbin)
 
-#Set ArchR Threads to 4:
-addArchRThreads(threads = 4, force = FALSE)
-
 #Load ArchR project
 proj_Mef2c_v13_E85_subset <- loadArchRProject("~/Mef2c_ArchR_working/Mef2c_v13_E85_subset")
 
