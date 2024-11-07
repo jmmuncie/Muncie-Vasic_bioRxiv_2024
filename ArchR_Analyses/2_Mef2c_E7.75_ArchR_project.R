@@ -1470,7 +1470,7 @@ saveArchRProject(ArchRProj = proj_Mef2c_v13_E775_subset, overwrite = TRUE, dropC
 #to load
 proj_Mef2c_v13_E775 <- loadArchRProject("~/Mef2c_ArchR_working/Mef2c_v13_E775_ATAC_and_GEX")
 proj_Mef2c_v13_E775_subset <- loadArchRProject("~/Mef2c_ArchR_working/Mef2c_v13_E775_subset")
-setwd("~/Mef2c_v13_ArchR_working")
+setwd("~/Mef2c_ArchR_working")
 
 
 
