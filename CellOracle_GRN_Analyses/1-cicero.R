@@ -1,31 +1,41 @@
-#This R script loads in an ArchR project and subsets a
-#peak-by-cell matrix for a given genotype (e.g., knockout).
-#Using Cicero and Monocle3, calculates peak co-accessibility,
-#and exports results, including peak information and Cicero connections,
-#for downstream gene regulatory network analysis.
-#Paths to input data and output folders are specified, and relevant
-#parameters (e.g., FDR cutoff, cell type) are set to tailor the
-#analysis for genotype-specific insights.
-
 library(cicero)
 library(monocle3)
 library(ArchR)
 
+
+## Uncomment if running Cicero on E8.5
+# E85: CMs_V_x_KO, CMs_IFT_x_KO, CMs_IFT_x_WT, CMs_OFT_x_WT, CMs_V_x_WT, CMs_OFT_x_KO
 load_folder <- "./data/Mef2c_v13_E85_subset/"
-proj_mef2c <- loadArchRProject(path = load_folder, force = FALSE, showLogo = TRUE)
 save_folder <- "./data/base_grn_outputs/E85/"
+proj_mef2c <- loadArchRProject(path = load_folder, force = FALSE, showLogo = TRUE)
+celltypes_to_keep <- c("CMs_V_x_KO", "CMs_IFT_x_KO", "CMs_IFT_x_WT", 
+                       "CMs_OFT_x_WT", "CMs_V_x_WT", "CMs_OFT_x_KO")
+
+
+## Uncomment if running Cicero on E9
+# E9: CMs_V_x_KO, CMs_IFT_x_WT, CMs_IFT_x_KO, CMs_V_x_WT, CMs_OFT_x_KO, CMs_OFT_x_WT
+# load_folder <- "./data/Mef2c_v13_E9_subset/"
+# save_folder <- "./data/base_grn_outputs/E9/"
+# proj_mef2c <- loadArchRProject(path = load_folder, force = FALSE, showLogo = TRUE)
+# celltypes_to_keep <- c("CMs_V_x_KO", "CMs_IFT_x_WT", "CMs_IFT_x_KO",
+#                        "CMs_V_x_WT", "CMs_OFT_x_KO", "CMs_OFT_x_WT")
+
+
+# Extract cell metadata
+cell_metadata <- getCellColData(proj_mef2c)
+# Get the cell names that match your target cell types
+cells_to_keep <- rownames(cell_metadata)[cell_metadata$CellTypeByGenotype %in% celltypes_to_keep]
 
 # First, get matrix formatted correctly
 peak_mat = getMatrixFromProject(proj_mef2c, useMatrix = "PeakMatrix", binarize = TRUE)
+peak_mat <- peak_mat[, cells_to_keep]
+
 peak_assays <- assays(peak_mat)
 
 peakinfo <- data.frame(chr = peak_mat@rowRanges@seqnames, 
                        bp1 = peak_mat@rowRanges@ranges@start, 
                        bp2 = peak_mat@rowRanges@ranges@start+500, 
-                       site_name = paste(peak_mat@rowRanges@seqnames,
-                       peak_mat@rowRanges@ranges@start,
-                       peak_mat@rowRanges@ranges@start+500,  sep="_"))
-
+                       site_name = paste(peak_mat@rowRanges@seqnames, peak_mat@rowRanges@ranges@start, peak_mat@rowRanges@ranges@start+500,  sep="_"))
 row.names(peakinfo) <- peakinfo$site_name
 
 cellinfo <- data.frame(cells = peak_mat@colData@rownames)
@@ -34,41 +44,27 @@ row.names(cellinfo) <- peak_mat@colData@rownames
 matrix_in <- peak_assays$PeakMatrix
 row.names(matrix_in) <- row.names(peakinfo)
 
-for (cell_type in c("WT", "KO")) {
-  matrix_in <- peak_assays$PeakMatrix
-  row.names(matrix_in) <- row.names(peakinfo)
-  peak_mat = getMatrixFromProject(proj_mef2c, useMatrix = "PeakMatrix", binarize = TRUE)
-  peak_assays <- assays(peak_mat)
-  
-  mask = proj_mef2c$Genotype == cell_type
-  
-  temp_matrix = matrix_in[,mask]
-  temp_cellinfo = data.frame(cells = cellinfo[mask,])
-  row.names(temp_cellinfo) = cellinfo[mask,]
-  
-  input_cds <-  suppressWarnings(new_cell_data_set(temp_matrix,
-                                                   cell_metadata = temp_cellinfo,
-                                                   gene_metadata = peakinfo))
-  
-  input_cds <- detect_genes(input_cds)
-  input_cds <- estimate_size_factors(input_cds)
-  input_cds <- preprocess_cds(input_cds, method = "LSI")
-  input_cds <- reduce_dimension(input_cds, reduction_method = 'UMAP', 
-                                preprocess_method = "LSI")
-  
-  umap_coords <- reducedDims(input_cds)$UMAP
-  
-  rm(matrix_in, peak_assays, peak_mat)
-  
-  cicero_cds <- make_cicero_cds(input_cds, reduced_coordinates = umap_coords)
-  
-  chromosome_length <- read.table("./data/mm10_chromosome_length.txt")
-  
-  conns <- run_cicero(cicero_cds, chromosome_length) 
-  
-  head(conns)
-  
-  all_peaks <- row.names(exprs(input_cds))
-  write.csv(x = all_peaks, file = paste0(save_folder, cell_type, "_peaks.csv"))
-  write.csv(x = conns, file = paste0(save_folder, cell_type, "_cicero_connections.csv"))
-}
+input_cds <-  suppressWarnings(new_cell_data_set(matrix_in,
+                                                 cell_metadata = cellinfo,
+                                                 gene_metadata = peakinfo))
+
+input_cds <- detect_genes(input_cds)
+input_cds <- estimate_size_factors(input_cds)
+input_cds <- preprocess_cds(input_cds, method = "LSI")
+input_cds <- reduce_dimension(input_cds, reduction_method = 'UMAP', 
+                              preprocess_method = "LSI")
+
+umap_coords <- reducedDims(input_cds)$UMAP
+
+cicero_cds <- make_cicero_cds(input_cds, reduced_coordinates = umap_coords)
+
+chromosome_length <- read.table("./data/mm10_chromosome_length.txt")
+
+conns <- run_cicero(cicero_cds, chromosome_length) 
+
+head(conns)
+
+all_peaks <- row.names(exprs(input_cds))
+
+write.csv(x = all_peaks, file = paste0(save_folder, "peaks.csv"))
+write.csv(x = conns, file = paste0(save_folder, "cicero_connections.csv"))

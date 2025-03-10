@@ -21,5 +21,5 @@ markersPeaks <- getMarkerFeatures(
 
 markerList <- getMarkers(markersPeaks, cutOff = "FDR <= 0.01")
 
-write.table(markerList$WT, file = paste0("./data/base_grn_diff_access/E", timepoint , "wt.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
-write.table(markerList$KO, file = paste0("./data/base_grn_diff_access/E", timepoint , "ko.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(markerList$WT, file = paste0("./data/base_grn_outputs/E", timepoint , "/", timepoint, "_diff_access_wt.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(markerList$KO, file = paste0("./data/base_grn_outputs/E", timepoint , "/", timepoint, "_diff_access_ko.txt"), sep = "\t", row.names = FALSE, quote = FALSE)

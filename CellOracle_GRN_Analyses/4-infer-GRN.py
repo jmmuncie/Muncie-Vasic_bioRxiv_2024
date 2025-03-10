@@ -23,7 +23,8 @@ co.__version__
 plt.rcParams['figure.figsize'] = [6, 4.5]
 plt.rcParams["savefig.dpi"] = 300
 
-for condition_timepoint in [['WT', '775'], ['KO', '775'], ['WT', '85'], ['KO', '85'], ['WT', '9'], ['KO', '9']]:
+for condition_timepoint in [['WT', '85'], ['KO', '85'], ['WT', '9'], ['KO', '9']]:
+# for condition_timepoint in [['WT', '85'], ['KO', '85']]:
     wt_or_ko = condition_timepoint[0]
     timepoint = condition_timepoint[1]
     
@@ -102,15 +103,27 @@ for condition_timepoint in [['WT', '775'], ['KO', '775'], ['WT', '85'], ['KO', '
             ]
             )]
 
-    base_GRN = pd.read_parquet(f'data/base_grn_outputs/E{timepoint}/{wt_or_ko}_base_GRN_dataframe.parquet')
+    base_GRN = pd.read_parquet(f'data/base_grn_outputs/E{timepoint}/base_GRN_dataframe.parquet')
     
     ### If you want to prune based on differential accessibility
-    # diffexp = pd.read_csv(f'./data/base_grn_diff_access/e{timepoint}{wt_or_ko.lower()}.txt', sep = '\t')
-    # removed_indexes = []
-    # for index, row in diffexp.iterrows():
-    #     if row['Log2FC'] < -1:
-    #         removed_indexes.append(f"{row['seqnames']}_{row['start']}_{row['end']}")                
-    # base_GRN = base_GRN[~base_GRN.peak_id.isin(removed_indexes)]
+    diffexp_wt_down = pd.read_csv(
+        f'./data/base_grn_outputs/E{timepoint}/E{timepoint}_diff_access_wt.txt'
+        , sep = '\t')
+    diffexp_ko_down = pd.read_csv(
+        f'./data/base_grn_outputs/E{timepoint}/E{timepoint}_diff_access_ko.txt'
+        , sep = '\t')
+    # I will exclude edges from WT network if the edges are significantly increased in KO... This does
+    # not mean the edges don't exist in WT, just want to emphasize difference between the two.
+    if wt_or_ko == 'WT':
+        lost_peaks = diffexp_wt_down
+    else:
+        lost_peaks = diffexp_ko_down
+        
+    removed_indexes = []
+    for index, row in lost_peaks.iterrows():
+        removed_indexes.append(f"{row['seqnames']}_{row['start']}_{row['end']}")
+        
+    base_GRN = base_GRN[~base_GRN.peak_id.isin(removed_indexes)]
     ###
     
     oracle = co.Oracle()
@@ -147,7 +160,8 @@ for condition_timepoint in [['WT', '775'], ['KO', '775'], ['WT', '85'], ['KO', '
     print("Starting to infer network")
     # Calculate GRN for each population in "louvain_annot" clustering unit.
     # This step may take some time.(~30 minutes)
-    links = oracle.get_links(cluster_name_for_GRN_unit="celltype_x_genotype", alpha=10,
+
+    links = oracle.get_links(cluster_name_for_GRN_unit="celltype_x_genotype", alpha=1000,
                              verbose_level=10)
     
     links.filter_links(p=0.001, weight="coef_abs", threshold_number=4000)
