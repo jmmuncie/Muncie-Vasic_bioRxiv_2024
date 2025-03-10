@@ -496,7 +496,7 @@ markers_mef2c_E85_KOvWT_IFTCM <- markers_mef2c_E85_KOvWT_IFTCM[order(markers_mef
 names(markers_mef2c_E85_KOvWT_IFTCM)[3] <- "pct.KO"
 names(markers_mef2c_E85_KOvWT_IFTCM)[4] <- "pct.WT"
 setwd("~/Desktop/Mef2c_v13_Seurat_scTrans_working/Seurat_Outs/E85_v3")
-fwrite(markers_mef2c_E85_KOvWT_IFTCM, row.names = TRUE, file = "Mef2c_v13_E85_harmony_subset_markers_KOvWT_IFTCM.csv")=
+fwrite(markers_mef2c_E85_KOvWT_IFTCM, row.names = TRUE, file = "Mef2c_v13_E85_harmony_subset_markers_KOvWT_IFTCM.csv")
 
 #Test for DEG between KO and WT cells in V CMs cluster
 Idents(mef2c_v13_E85_v3_subset) <- "harmony_cell_type_subset"

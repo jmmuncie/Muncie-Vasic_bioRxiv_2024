@@ -1,0 +1,51 @@
+————————————————————————————————————————————- 
+Building a custom BSgenome for ArchR analyses
+————————————————————————————————————————————— 
+
+###Building a full genome sequence for Mus musculus mm10 (GENCODE vM23/Ensembl 98) containing only standard chromosomes (excluding all unlocalized scaffolds), with the addition of the exogenous F6-eGFP reporter. For F6-eGFP, using 2128 base pair sequence spanning eGFP, WPRE, bGH poly(A) signal, Ef-1alpha poly(A) signal. 1-2128 annotated as "gene." 1-1322 annotated as "CDS," "transcript," and "exon."
+
+#References:
+https://bioconductor.org/packages/devel/bioc/vignettes/BSgenome/inst/doc/BSgenomeForge.pdf
+https://www.tomguest.me/tutorial/bsgenome
+
+#This involves splitting the single large fasta file “genome.fa” into separate files per chromosome
+#"genome.fa" was produced by cellranger-arc mkref when we made our custom reference genome for aligning sequencing reads
+#Alternatively, can download mm10 genome assembly fasta from UCSC Genome Browser or NCBI and use that as starting point
+https://crashcourse.housegordon.org/split-fasta-files.html
+
+#From within directory containing the single genome.fa file
+$gcsplit -s -z genome.fa '/>/' '{*}'
+#This will split the file at every instance of > and by default create a new file beginning with xx
+
+#This for loop will rename each of the new xx files with the chromosome name found within the header of each
+$for i in xx* ; do \
+  n=$(sed 's/>// ; s/ .*// ; 1q' "$i") ; \
+  mv "$i" "$n.fa" ; \
+ done
+
+#After splitting, remove the full genome.fa file and any non-standard chromosomes / unlocalized scaffolds 
+
+#NOTE:IMPORTANT: need to manually rename custom F6-eGFP.fa to "chrF6-eGFP.fa" and also edit the header to be "chrF6-eGFP" 
+#Otherwise, it will not pass the check run by ArchR that ensures all chromosomes start with "chr"
+#So in this case, our F6-eGFP will act as a pseudo-chromosome
+
+#Once fastas are split and renamed, move the ones you want to use into a folder named "seqs_srcdir"
+
+#Next step is to build the seed file. Start with template seed provided in this repository or downloaded from https://www.tomguest.me/tutorial/bsgenome, or any other. 
+#Update all fields in seed file accordingly using a text editor, but be sure not to change file format (it is a DCF file).
+
+#The following assumes the seed file has been named "BSgenome.Mmusculus.GENCODE.mm10v13-seed"
+
+#Now that you're ready to build, open R, set working directory to folder containing seed file, and run:
+library(BSgenome)
+forgeBSgenomeDataPkg("BSgenome.Mmusculus.GENCODE.mm10v13-seed")
+
+#Close R
+#Open Terminal
+#In Terminal navigate to your working directory, and run:
+R CMD build BSgenome.Mmusculus.GENCODE.mm10v13 #to compile the package
+R CMD check BSgenome.Mmusculus.GENCODE.mm10v13_1.0.0.tar.gz #to check it
+R CMD INSTALL BSgenome.Mmusculus.GENCODE.mm10v13_1.0.0.tar.gz
+
+#You're done! Open R and load:
+library(BSgenome.Mmusculus.GENCODE.mm10v13)
